@@ -34,7 +34,7 @@ namespace HttpsUtility.Symbols
     using LONG_INTEGER = System.UInt32;       // uint = LONG_INTEGER (unsigned)
     /* ------------------------------------------------------------------------------------------------------------------------------ */
 
-    public partial class SimplHttpsClient
+    public sealed partial class SimplHttpsClient
     {
         public SimplHttpsClientResponseDelegate SimplHttpsClientResponse { get; set; }
 

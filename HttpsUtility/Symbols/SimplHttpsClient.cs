@@ -40,7 +40,7 @@ namespace HttpsUtility.Symbols
     using LONG_INTEGER = System.UInt32;       // uint = LONG_INTEGER (unsigned)
     /* ------------------------------------------------------------------------------------------------------------------------------ */
 
-    public partial class SimplHttpsClient
+    public sealed partial class SimplHttpsClient
     {
         private readonly Lazy2<string> _moduleIdentifier;
         private readonly HttpsClient _httpsClient = new HttpsClient();
