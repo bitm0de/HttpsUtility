@@ -22,6 +22,7 @@
 */
 
 using System;
+using System.Collections.Generic;
 
 namespace HttpsUtility
 {
@@ -48,6 +49,36 @@ namespace HttpsUtility
         public static string EmptyIfNull(this string input)
         {
             return input ?? string.Empty;
+        }
+
+        /// <summary>
+        /// Split an input string into chunks specified by a max length
+        /// </summary>
+        /// <param name="input">Input string</param>
+        /// <param name="maxLength">Maximum size of each chunk</param>
+        /// <returns><see cref="IEnumerable{T}"/> of strings split up into chunks.</returns>
+        /// <exception cref="ArgumentNullException">Input string is null.</exception>
+        /// <exception cref="ArgumentException">Max length is less than 1.</exception>
+        public static IEnumerable<string> SplitIntoChunks(this string input, int maxLength)
+        {
+            if (input == null)
+                throw new ArgumentNullException("input");
+            
+            if (maxLength <= 0)
+                throw new ArgumentException("maxSize must be greater than 0.");
+
+            if (input == string.Empty)
+                return new[] { string.Empty };
+            
+            int n = 0;
+            string[] chunks = new string[(int)(input.Length / (double)maxLength + .5)];
+            while (n < chunks.Length - 1)
+            {
+                chunks[n++] = input.Substring(n * maxLength, maxLength);
+            }
+            
+            chunks[n] = input.Substring(n * maxLength);
+            return chunks;
         }
 
         /// <summary>

@@ -31,6 +31,8 @@ using HttpsUtility.Threading;
 
 using RequestType = Crestron.SimplSharp.Net.Https.RequestType;
 
+// ReSharper disable UnusedMember.Global
+
 namespace HttpsUtility.Https
 {
     public sealed class HttpsClient : IDisposable

@@ -21,30 +21,33 @@
  *
 */
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Crestron.SimplSharp;
 using Crestron.SimplSharp.Reflection;
 using HttpsUtility.Https;
+using HttpsUtility.Threading;
 
 // ReSharper disable UnusedMember.Global
 
 namespace HttpsUtility.Symbols
 {
     /* --------------------------------------------  GENERIC SIMPL+ TYPE HELPER ALIASES  -------------------------------------------- */
-    using STRING = System.String;             // string = STRING
-    using SSTRING = SimplSharpString;         // SimplSharpString = STRING (used to interface with SIMPL+)
-    using INTEGER = System.UInt16;            // ushort = INTEGER (unsigned)
-    using SIGNED_INTEGER = System.Int16;      // short = SIGNED_INTEGER
-    using SIGNED_LONG_INTEGER = System.Int32; // int = SIGNED_LONG_INTEGER
-    using LONG_INTEGER = System.UInt32;       // uint = LONG_INTEGER (unsigned)
+    using STRING = String;             // string = STRING
+    using SSTRING = SimplSharpString;  // SimplSharpString = STRING (used to interface with SIMPL+)
+    using INTEGER = UInt16;            // ushort = INTEGER (unsigned)
+    using SIGNED_INTEGER = Int16;      // short = SIGNED_INTEGER
+    using SIGNED_LONG_INTEGER = Int32; // int = SIGNED_LONG_INTEGER
+    using LONG_INTEGER = UInt32;       // uint = LONG_INTEGER (unsigned)
     /* ------------------------------------------------------------------------------------------------------------------------------ */
 
     public sealed partial class SimplHttpsClient
     {
         private readonly Lazy2<string> _moduleIdentifier;
         private readonly HttpsClient _httpsClient = new HttpsClient();
-
+        private readonly SyncSection _httpsOperationLock = new SyncSection();
+        
         public SimplHttpsClient()
         {
             _moduleIdentifier = new Lazy2<string>(() =>
@@ -68,33 +71,39 @@ namespace HttpsUtility.Symbols
                     header.Substring(n + 1).Trim())
                 ).ToList();
         }
+
+        private INTEGER MakeRequest(Func<HttpsResult> action)
+        {
+            using (_httpsOperationLock.AquireLock())
+            {
+                var response = action.Invoke();
+                foreach (var contentChunk in response.Content.SplitIntoChunks(250))
+                {
+                    OnSimplHttpsClientResponse(response.Status, response.ResponseUrl, contentChunk);
+                    CrestronEnvironment.Sleep(10); // allow for things to process
+                }
+                return (INTEGER)response.Status;
+            }
+        }
         
         public INTEGER SendGet(STRING url, STRING headers)
         {
-            var response = _httpsClient.Get(url, ParseHeaders(headers));
-            OnSimplHttpsClientResponse(response.Status, response.ResponseUrl, response.Content);
-            return (INTEGER)response.Status;
+            return MakeRequest(() => _httpsClient.Get(url, ParseHeaders(headers)));
         }
         
         public INTEGER SendPost(STRING url, STRING headers, STRING content)
         {
-            var response = _httpsClient.Post(url, ParseHeaders(headers), content.NullIfEmpty());
-            OnSimplHttpsClientResponse(response.Status, response.ResponseUrl, response.Content);
-            return (INTEGER)response.Status;
+            return MakeRequest(() => _httpsClient.Post(url, ParseHeaders(headers), content.NullIfEmpty()));
         }
         
         public INTEGER SendPut(STRING url, STRING headers, STRING content)
         {
-            var response = _httpsClient.Put(url, ParseHeaders(headers), content.NullIfEmpty());
-            OnSimplHttpsClientResponse(response.Status, response.ResponseUrl, response.Content);
-            return (INTEGER)response.Status;
+            return MakeRequest(() => _httpsClient.Put(url, ParseHeaders(headers), content.NullIfEmpty()));
         }
         
         public INTEGER SendDelete(STRING url, STRING headers, STRING content)
         {
-            var response = _httpsClient.Delete(url, ParseHeaders(headers), content.NullIfEmpty());
-            OnSimplHttpsClientResponse(response.Status, response.ResponseUrl, response.Content);
-            return (INTEGER)response.Status;
+            return MakeRequest(() => _httpsClient.Delete(url, ParseHeaders(headers), content.NullIfEmpty()));
         }
 
         public override string ToString()
