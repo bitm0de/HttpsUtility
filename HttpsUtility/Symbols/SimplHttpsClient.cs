@@ -52,7 +52,7 @@ namespace HttpsUtility.Symbols
                 var asm = Assembly.GetExecutingAssembly().GetName();
                 return string.Format("{0} {1}", asm.Name, asm.Version.ToString(2));
             });
-    }
+        }
         
         private static IEnumerable<KeyValuePair<string, string>> ParseHeaders(STRING input)
         {
