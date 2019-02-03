@@ -5,22 +5,22 @@ A basic HTTPS utility S# module for general use where simple secure web requests
 ```cs
 namespace HttpsUtility.Symbols
 {
-	// note: type can be instantiated from SIMPL+
-	class SimplHttpsClient
-	{
-		// class properties
-		// RegisterDelegate(obj, SimplHttpsClientResponse, SimplHttpsClientResponseHandler);
-		// CALLBACK FUNCTION SimplHttpsClientResponseHandler(INTEGER status, STRING responseUrl, STRING content);
-		DelegateProperty SimplHttpsClientResponseDelegate SimplHttpsClientResponse(INTEGER status, STRING responseUrl, STRING content);
+  // note: type can be instantiated from SIMPL+
+  class SimplHttpsClient
+  {
+    // class properties
+    // RegisterDelegate(obj, SimplHttpsClientResponse, SimplHttpsClientResponseHandler);
+    // CALLBACK FUNCTION SimplHttpsClientResponseHandler(INTEGER status, STRING responseUrl, STRING content);
+    DelegateProperty SimplHttpsClientResponseDelegate SimplHttpsClientResponse(INTEGER status, STRING responseUrl, STRING content);
 
-		// class methods
-		INTEGER_FUNCTION SendGet(STRING url, STRING headers);
-		INTEGER_FUNCTION SendPost(STRING url, STRING headers, STRING content);
-		INTEGER_FUNCTION SendPut(STRING url, STRING headers, STRING content);
-		INTEGER_FUNCTION SendDelete(STRING url, STRING headers, STRING content);
-		STRING_FUNCTION ToString();
-		SIGNED_LONG_INTEGER_FUNCTION GetHashCode();
-	}
+    // class methods
+    INTEGER_FUNCTION SendGet(STRING url, STRING headers);
+    INTEGER_FUNCTION SendPost(STRING url, STRING headers, STRING content);
+    INTEGER_FUNCTION SendPut(STRING url, STRING headers, STRING content);
+    INTEGER_FUNCTION SendDelete(STRING url, STRING headers, STRING content);
+    STRING_FUNCTION ToString();
+    SIGNED_LONG_INTEGER_FUNCTION GetHashCode();
+  }
 }
 ```
 
