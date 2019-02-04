@@ -3,6 +3,6 @@
 [assembly: AssemblyTitle("HttpsUtility")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("HttpsUtility")]
-[assembly: AssemblyCopyright("Copyright ©  2019")]
-[assembly: AssemblyVersion("1.0.0.*")]
+[assembly: AssemblyCopyright("Copyright © Troy Garner 2019")]
+[assembly: AssemblyVersion("1.0.1.*")]
 
