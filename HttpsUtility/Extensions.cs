@@ -71,13 +71,13 @@ namespace HttpsUtility
                 return new[] { string.Empty };
             
             int n = 0;
-            string[] chunks = new string[(int)(input.Length / (double)maxLength + .5)];
-            while (n < chunks.Length - 1)
+            List<string> chunks = new List<string>(input.Length / maxLength);
+            while (n != input.Length)
             {
-                chunks[n++] = input.Substring(n * maxLength, maxLength);
+                int length = Math.Min(maxLength, input.Length - n);
+                chunks.Add(input.Substring(n, length));
+                n += length;
             }
-            
-            chunks[n] = input.Substring(n * maxLength);
             return chunks;
         }
 
