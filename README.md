@@ -1,6 +1,8 @@
 # HttpsUtility
 A basic HTTPS utility S# module for general use where simple secure web requests are necessary, but complex chains of requests involving cookies, and response parsing is not. This module was intended for simple functionality only, where a custom solution is not needed.
 
+![modules](https://img.shields.io/badge/S%23-Modules-brightgreen.svg) ![release](https://img.shields.io/github/release/bitm0de/HttpsUtility.svg?style=flat) ![downloads](https://img.shields.io/github/downloads/bitm0de/HttpsUtility/total.svg?style=flat) ![issues](https://img.shields.io/github/issues/bitm0de/HttpsUtility.svg?style=flat) ![license](https://img.shields.io/github/license/bitm0de/HttpsUtility.svg?style=flat)
+
 ## Generated API (Intended for use by SIMPL+)
 ```cs
 namespace HttpsUtility.Symbols
