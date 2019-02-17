@@ -32,23 +32,28 @@ namespace HttpsUtility
     /// Wrapper for lazy initialization support (before .NET 4.0).
     /// </summary>
     /// <typeparam name="T">Object type to be lazy initialized.</typeparam>
-    public sealed class Lazy<T> : IDisposable
-        where T : new()
+    public class Lazy<T> : IDisposable
     {
         private Box _box;
         private volatile bool _initialized;
     
         [NonSerialized]
-        private readonly Func<T> _valueInitFunc;
+        private readonly Func<T> _initializationFunc;
     
         [NonSerialized]
         private readonly ILockSynchronization _syncSection = new SyncSection();
 
+        /// <summary>
+        /// Determines whether lazily initialized value has been initialized or not.
+        /// </summary>
         public bool Initialized
         {
             get { using (_syncSection.AquireLock()) { return _initialized; } }
         }
     
+        /// <summary>
+        /// Lazily initialized value.
+        /// </summary>
         public T Value
         {
             get
@@ -59,7 +64,7 @@ namespace HttpsUtility
                     {
                         if (!_initialized)
                         {
-                            _box = new Box(_valueInitFunc());
+                            _box = new Box(_initializationFunc());
                             _initialized = true;
                         }
                     }
@@ -69,13 +74,27 @@ namespace HttpsUtility
             }
         }
 
-        public Lazy()
-            : this(Crestron.SimplSharp.Reflection.Activator.CreateInstance<T>)
-        { }
-
-        public Lazy(Func<T> valueInitFunc)
+        /// <summary>
+        /// Initializes a new lazy instance of the type constructed by the initialization function.
+        /// </summary>
+        /// <param name="initializationFunc">Initialization functor.</param>
+        public Lazy(Func<T> initializationFunc)
         {
-            _valueInitFunc = valueInitFunc;
+            _initializationFunc = initializationFunc;
+        }
+
+        /// <summary>
+        /// Creates a default instance of the specified type.
+        /// </summary>
+        /// <typeparam name="TObject">Object type</typeparam>
+        /// <returns>Lazy instance of the specified type.</returns>
+        /// <remarks>The new() type constraint is placed on this little factory method
+        /// as a way to still allow for types that aren't restricted by this limitation
+        /// to be used by the class</remarks>
+        public static Lazy<TObject> CreateNew<TObject>()
+            where TObject : new()
+        {
+            return new Lazy<TObject>(Crestron.SimplSharp.Reflection.Activator.CreateInstance<TObject>);
         }
     
         public override string ToString()
@@ -86,9 +105,7 @@ namespace HttpsUtility
         public void Dispose()
         {
             if (Initialized && _box.Value is IDisposable)
-            {
                 ((IDisposable)_box.Value).Dispose();
-            }
         }
     
         [Serializable]

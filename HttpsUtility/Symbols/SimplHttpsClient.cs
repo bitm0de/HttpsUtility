@@ -44,13 +44,13 @@ namespace HttpsUtility.Symbols
 
     public sealed partial class SimplHttpsClient
     {
-        private readonly Lazy2<string> _moduleIdentifier;
+        private readonly Lazy<string> _moduleIdentifier;
         private readonly HttpsClient _httpsClient = new HttpsClient();
         private readonly SyncSection _httpsOperationLock = new SyncSection();
         
         public SimplHttpsClient()
         {
-            _moduleIdentifier = new Lazy2<string>(() =>
+            _moduleIdentifier = new Lazy<string>(() =>
             {
                 var asm = Assembly.GetExecutingAssembly().GetName();
                 return string.Format("{0} {1}", asm.Name, asm.Version.ToString(2));
