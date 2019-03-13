@@ -32,14 +32,14 @@ namespace HttpsUtility
     /// Wrapper for lazy initialization support (before .NET 4.0).
     /// </summary>
     /// <typeparam name="T">Object type to be lazy initialized.</typeparam>
-    public class Lazy<T> : IDisposable
+    public sealed class Lazy<T> : IDisposable
     {
         private Box _box;
         private volatile bool _initialized;
-    
+
         [NonSerialized]
         private readonly Func<T> _initializationFunc;
-    
+
         [NonSerialized]
         private readonly ILockSynchronization _syncSection = new SyncSection();
 
@@ -50,7 +50,7 @@ namespace HttpsUtility
         {
             get { using (_syncSection.AquireLock()) { return _initialized; } }
         }
-    
+
         /// <summary>
         /// Lazily initialized value.
         /// </summary>
@@ -83,6 +83,30 @@ namespace HttpsUtility
             _initializationFunc = initializationFunc;
         }
 
+        public override string ToString()
+        {
+            return _initialized ? Value.ToString() : base.ToString();
+        }
+
+        public void Dispose()
+        {
+            if (Initialized && _box.Value is IDisposable)
+                ((IDisposable)_box.Value).Dispose();
+        }
+
+        [Serializable]
+        private class Box
+        {
+            internal readonly T Value;
+            internal Box(T value) { Value = value; }
+        }
+    }
+
+    /// <summary>
+    /// Non-generic class helper
+    /// </summary>
+    public sealed class Lazy
+    {
         /// <summary>
         /// Creates a default instance of the specified type.
         /// </summary>
@@ -95,24 +119,6 @@ namespace HttpsUtility
             where TObject : new()
         {
             return new Lazy<TObject>(Crestron.SimplSharp.Reflection.Activator.CreateInstance<TObject>);
-        }
-    
-        public override string ToString()
-        {
-            return _initialized ? Value.ToString() : base.ToString();
-        }
-
-        public void Dispose()
-        {
-            if (Initialized && _box.Value is IDisposable)
-                ((IDisposable)_box.Value).Dispose();
-        }
-    
-        [Serializable]
-        private class Box
-        {
-            internal readonly T Value;
-            internal Box(T value) { Value = value; }
         }
     }
 }
