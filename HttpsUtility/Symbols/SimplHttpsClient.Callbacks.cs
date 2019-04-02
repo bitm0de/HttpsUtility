@@ -41,10 +41,10 @@ namespace HttpsUtility.Symbols
     {
         public SimplHttpsClientResponseDelegate SimplHttpsClientResponse { get; set; }
 
-        private void OnSimplHttpsClientResponse(int status, string responseUrl, string content)
+        private void OnSimplHttpsClientResponse(int status, string responseUrl, string content, int length)
         {
             var handler = SimplHttpsClientResponse;
-            if (handler != null) handler.Invoke((INTEGER)status, responseUrl.EmptyIfNull(), content.EmptyIfNull());
+            if (handler != null) handler.Invoke((INTEGER)status, responseUrl.EmptyIfNull(), content.EmptyIfNull(), (INTEGER)length);
         }
     }
 }

@@ -35,5 +35,5 @@ namespace HttpsUtility.Symbols
     using LONG_INTEGER = UInt32;       // uint = LONG_INTEGER (unsigned)
     /* ------------------------------------------------------------------------------------------------------------------------------ */
 
-    public delegate void SimplHttpsClientResponseDelegate(INTEGER status, SSTRING responseUrl, SSTRING content);
+    public delegate void SimplHttpsClientResponseDelegate(INTEGER status, SSTRING responseUrl, SSTRING content, INTEGER length);
 }

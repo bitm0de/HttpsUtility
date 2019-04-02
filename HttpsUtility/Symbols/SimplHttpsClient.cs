@@ -79,7 +79,7 @@ namespace HttpsUtility.Symbols
                 var response = action.Invoke();
                 foreach (var contentChunk in response.Content.SplitIntoChunks(250))
                 {
-                    OnSimplHttpsClientResponse(response.Status, response.ResponseUrl, contentChunk);
+                    OnSimplHttpsClientResponse(response.Status, response.ResponseUrl, contentChunk, response.Content.Length);
                     CrestronEnvironment.Sleep(10); // allow for things to process
                 }
                 return (INTEGER)response.Status;
