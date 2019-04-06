@@ -12,8 +12,8 @@ namespace HttpsUtility.Symbols
   {
     // class properties
     // RegisterDelegate(obj, SimplHttpsClientResponse, SimplHttpsClientResponseHandler);
-    // CALLBACK FUNCTION SimplHttpsClientResponseHandler(INTEGER status, STRING responseUrl, STRING content);
-    DelegateProperty SimplHttpsClientResponseDelegate SimplHttpsClientResponse(INTEGER status, STRING responseUrl, STRING content);
+    // CALLBACK FUNCTION SimplHttpsClientResponseHandler(INTEGER status, STRING responseUrl, STRING content, INTEGER length);
+    DelegateProperty SimplHttpsClientResponseDelegate SimplHttpsClientResponse(INTEGER status, STRING responseUrl, STRING content, INTEGER length);
 
     // class methods
     INTEGER_FUNCTION SendGet(STRING url, STRING headers);
