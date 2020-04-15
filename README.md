@@ -3,6 +3,12 @@ A basic HTTPS utility S# module for general use where simple secure web requests
 
 [![modules](https://img.shields.io/badge/S%23-Modules-brightgreen.svg)](https://sharptoothcode.com) [![release](https://img.shields.io/github/release/bitm0de/HttpsUtility.svg?style=flat)](https://github.com/bitm0de/HttpsUtility/releases) [![downloads](https://img.shields.io/github/downloads/bitm0de/HttpsUtility/total.svg?style=flat)](https://github.com/bitm0de/HttpsUtility/releases) [![issues](https://img.shields.io/github/issues/bitm0de/HttpsUtility.svg?style=flat)](https://github.com/bitm0de/HttpsUtility/issues) [![license](https://img.shields.io/github/license/bitm0de/HttpsUtility.svg?style=flat)](https://github.com/bitm0de/HttpsUtility/blob/master/LICENSE)
 
+## Information
+Multiple headers are supported, the formatting for sending multiple headers to the public functions requires each header to be separated by a "|" character.
+
+Example:
+```Accept: application/json|Content-Type: application/json```
+
 ## Generated API (Intended for use by SIMPL+)
 ```cs
 namespace HttpsUtility.Symbols
@@ -12,8 +18,8 @@ namespace HttpsUtility.Symbols
   {
     // class properties
     // RegisterDelegate(obj, SimplHttpsClientResponse, SimplHttpsClientResponseHandler);
-    // CALLBACK FUNCTION SimplHttpsClientResponseHandler(INTEGER status, STRING responseUrl, STRING content);
-    DelegateProperty SimplHttpsClientResponseDelegate SimplHttpsClientResponse(INTEGER status, STRING responseUrl, STRING content);
+    // CALLBACK FUNCTION SimplHttpsClientResponseHandler(INTEGER status, STRING responseUrl, STRING content, INTEGER length);
+    DelegateProperty SimplHttpsClientResponseDelegate SimplHttpsClientResponse(INTEGER status, STRING responseUrl, STRING content, INTEGER length);
 
     // class methods
     INTEGER_FUNCTION SendGet(STRING url, STRING headers);
@@ -28,3 +34,5 @@ namespace HttpsUtility.Symbols
 
 ## Downloads
 If you do not want to build your own modules from the compiled S# archive, you can download our SIMPL user modules with the SIMPL# library in a demo program here: https://sharptoothcode.com/product/httpsutility/
+
+* Note: I have no direct affiliation with the above website anymore due to employment changes. I do still have full control over maintaining this repository however.
