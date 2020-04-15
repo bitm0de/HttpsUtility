@@ -33,6 +33,5 @@ namespace HttpsUtility.Symbols
 ```
 
 ## Downloads
-If you do not want to build your own modules from the compiled S# archive, you can download our SIMPL user modules with the SIMPL# library in a demo program here: https://sharptoothcode.com/product/httpsutility/
 
-* Note: I have no direct affiliation with the above website anymore due to employment changes. I do still have full control over maintaining this repository however.
+* Note: I have no direct affiliation with "SharptoothCode" anymore due to employment changes. I do still have full control over maintaining this repository however. (Current releases on Github will contain the relevant SIMPL Windows and SIMPL+ module files.)
