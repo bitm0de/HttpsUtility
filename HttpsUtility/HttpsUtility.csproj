@@ -68,25 +68,16 @@
   <ItemGroup>
     <Compile Include="Diagnostics\AssertionException.cs" />
     <Compile Include="Diagnostics\Debug.cs" />
-    <Compile Include="Diagnostics\DebugLevelFlags.cs" />
-    <Compile Include="Diagnostics\ErrorLogMessageType.cs" />
-    <Compile Include="Diagnostics\Formatters\AssemblyFormatter.cs" />
-    <Compile Include="Diagnostics\Formatters\IDiagnosticsFormatter.cs" />
+    <Compile Include="Diagnostics\DebugLevel.cs" />
     <Compile Include="Extensions.cs" />
-    <Compile Include="Https\HttpsClient.cs" />
+    <Compile Include="Https\HttpsClientPool.cs" />
     <Compile Include="Https\HttpsResult.cs" />
     <Compile Include="Lazy.cs" />
+    <Compile Include="ObjectPool.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Symbols\SimplHttpsClient.Callbacks.cs" />
     <Compile Include="Symbols\SimplHttpsClient.cs" />
     <Compile Include="Symbols\SimplHttpsClient.Delegates.cs" />
-    <Compile Include="Threading\ILockSynchronization.cs" />
-    <Compile Include="Threading\LockToken.cs" />
-    <Compile Include="Threading\SyncAutoResetEvent.cs" />
-    <Compile Include="Threading\SyncManualResetEvent.cs" />
-    <Compile Include="Threading\SyncMonitor.cs" />
-    <Compile Include="Threading\SyncMutex.cs" />
-    <Compile Include="Threading\SyncSection.cs" />
     <None Include="Properties\ControlSystem.cfg" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CompactFramework.CSharp.targets" />

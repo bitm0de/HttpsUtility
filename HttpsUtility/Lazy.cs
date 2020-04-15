@@ -22,9 +22,7 @@
 */
 
 using System;
-using HttpsUtility.Threading;
-
-// ReSharper disable MemberCanBePrivate.Global
+using Crestron.SimplSharp;
 
 namespace HttpsUtility
 {
@@ -32,73 +30,80 @@ namespace HttpsUtility
     /// Wrapper for lazy initialization support (before .NET 4.0).
     /// </summary>
     /// <typeparam name="T">Object type to be lazy initialized.</typeparam>
-    public sealed class Lazy<T> : IDisposable
+    public sealed class Lazy<T>
     {
-        private Box _box;
+        private Box _boxValue;
         private volatile bool _initialized;
 
-        [NonSerialized]
-        private readonly Func<T> _initializationFunc;
+        [NonSerialized] private readonly Func<T> _valueInitFunc;
+        [NonSerialized] private readonly CCriticalSection _objLock = new CCriticalSection();
 
-        [NonSerialized]
-        private readonly ILockSynchronization _syncSection = new SyncSection();
-
-        /// <summary>
-        /// Determines whether lazily initialized value has been initialized or not.
-        /// </summary>
         public bool Initialized
         {
-            get { using (_syncSection.AquireLock()) { return _initialized; } }
+            get
+            {
+                try
+                {
+                    _objLock.Enter();
+                    return _initialized;
+                }
+                finally
+                {
+                    _objLock.Leave();
+                }
+            }
         }
 
-        /// <summary>
-        /// Lazily initialized value.
-        /// </summary>
         public T Value
         {
             get
             {
                 if (!_initialized)
                 {
-                    using (_syncSection.AquireLock())
+                    try
                     {
+                        _objLock.Enter();
                         if (!_initialized)
                         {
-                            _box = new Box(_initializationFunc());
+                            _boxValue = new Box(_valueInitFunc());
                             _initialized = true;
                         }
                     }
+                    finally
+                    {
+                        _objLock.Leave();
+                    }
                 }
 
-                return _box.Value;
+                return _boxValue.Value;
             }
         }
 
-        /// <summary>
-        /// Initializes a new lazy instance of the type constructed by the initialization function.
-        /// </summary>
-        /// <param name="initializationFunc">Initialization functor.</param>
-        public Lazy(Func<T> initializationFunc)
+        public Lazy()
+            : this(() => (T)Activator.CreateInstance(typeof(T))) { }
+
+        public Lazy(Func<T> valueInitFunc)
         {
-            _initializationFunc = initializationFunc;
+            if (valueInitFunc == null)
+                throw new ArgumentNullException("valueInitFunc");
+
+            _valueInitFunc = valueInitFunc;
         }
 
         public override string ToString()
         {
-            return _initialized ? Value.ToString() : base.ToString();
-        }
-
-        public void Dispose()
-        {
-            if (Initialized && _box.Value is IDisposable)
-                ((IDisposable)_box.Value).Dispose();
+            return _initialized ? Value.ToString() : "null";
         }
 
         [Serializable]
         private class Box
         {
             internal readonly T Value;
-            internal Box(T value) { Value = value; }
+
+            internal Box(T value)
+            {
+                Value = value;
+            }
         }
     }
 
@@ -110,15 +115,15 @@ namespace HttpsUtility
         /// <summary>
         /// Creates a default instance of the specified type.
         /// </summary>
-        /// <typeparam name="TObject">Object type</typeparam>
+        /// <typeparam name="T">Object type</typeparam>
         /// <returns>Lazy instance of the specified type.</returns>
         /// <remarks>The new() type constraint is placed on this little factory method
         /// as a way to still allow for types that aren't restricted by this limitation
         /// to be used by the class</remarks>
-        public static Lazy<TObject> CreateNew<TObject>()
-            where TObject : new()
+        public static Lazy<T> CreateNew<T>()
+            where T : new()
         {
-            return new Lazy<TObject>(Crestron.SimplSharp.Reflection.Activator.CreateInstance<TObject>);
+            return new Lazy<T>(Activator.CreateInstance<T>);
         }
     }
 }
