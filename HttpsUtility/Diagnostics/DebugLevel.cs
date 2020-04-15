@@ -21,8 +21,6 @@
  *
 */
 
-// ReSharper disable UnusedMember.Global
-
 using System;
 
 namespace HttpsUtility.Diagnostics
@@ -31,12 +29,13 @@ namespace HttpsUtility.Diagnostics
     /// Flags to set the debug level verbosity.
     /// </summary>
     [Flags]
-    public enum DebugLevelFlags
+    public enum DebugLevel
     {
-        None      = 0,
-        Info      = 1,
-        Warning   = 2,
-        Error     = 4,
-        Exception = 8
+        Notice = 0,
+        Info = 1,
+        Warning = 2,
+        Error = 4,
+        Exception = 8,
+        All = 15
     }
 }

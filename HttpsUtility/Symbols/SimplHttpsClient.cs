@@ -28,17 +28,14 @@ using Crestron.SimplSharp;
 using Crestron.SimplSharp.Reflection;
 using HttpsUtility.Diagnostics;
 using HttpsUtility.Https;
-using HttpsUtility.Threading;
-
-// ReSharper disable UnusedMember.Global
 
 namespace HttpsUtility.Symbols
 {
+    // ReSharper disable once UnusedType.Global
     public sealed partial class SimplHttpsClient
     {
         private readonly string _moduleIdentifier;
-        private readonly HttpsClient _httpsClient = new HttpsClient();
-        private readonly SyncSection _httpsOperationLock = new SyncSection();
+        private readonly HttpsClientPool _httpsClientPool = new HttpsClientPool();
         
         public SimplHttpsClient()
         {
@@ -46,18 +43,6 @@ namespace HttpsUtility.Symbols
             _moduleIdentifier = string.Format("{0} {1}", asm.Name, asm.Version.ToString(2));
         }
 
-        public ushort PeerVerification
-        {
-            get { return (ushort)(_httpsClient.PeerVerification ? 1 : 0); }
-            set { _httpsClient.PeerVerification = value != 0; }
-        }
-
-        public ushort HostVerification
-        {
-            get { return (ushort)(_httpsClient.HostVerification ? 1 : 0); }
-            set { _httpsClient.HostVerification = value != 0; }
-        }
-        
         private static IEnumerable<KeyValuePair<string, string>> ParseHeaders(string input)
         {
             if (string.IsNullOrEmpty(input))
@@ -77,57 +62,54 @@ namespace HttpsUtility.Symbols
         {
             try
             {
-                using (_httpsOperationLock.AquireLock())
+                var response = action.Invoke();
+                if (response == null)
                 {
-                    var response = action.Invoke();
-                    if (response == null)
-                    {
-                        Debug.ErrorLog(ErrorLogMessageType.Error, string.Format("{0}: MakeRequest - response is null", GetType().Name));
-                        return 0;
-                    }
-
-                    // Some HTTP(S) responses will not have a message body.
-                    if (response.Content == null)
-                    {
-                        OnSimplHttpsClientResponse(response.Status, response.ResponseUrl, string.Empty, 0);
-                    }
-                    else
-                    {
-                        foreach (var contentChunk in response.Content.SplitIntoChunks(255))
-                        {
-                            OnSimplHttpsClientResponse(response.Status, response.ResponseUrl, contentChunk, response.Content.Length);
-                            CrestronEnvironment.Sleep(10); // allow a little bit for things to process
-                        }
-                    }
-                    
-                    return (ushort)response.Status;
+                    Debug.WriteError("HTTPS response object was null.");
+                    return 0;
                 }
+
+                // Some HTTP(S) responses will not have a message body.
+                if (response.Content == null)
+                {
+                    OnSimplHttpsClientResponse(response.Status, response.ResponseUrl, string.Empty, 0);
+                }
+                else
+                {
+                    foreach (var contentChunk in response.Content.SplitIntoChunks(255))
+                    {
+                        OnSimplHttpsClientResponse(response.Status, response.ResponseUrl, contentChunk, response.Content.Length);
+                        CrestronEnvironment.Sleep(10); // allow a little bit for things to process
+                    }
+                }
+
+                return (ushort)response.Status;
             }
             catch (Exception ex)
             {
-                Debug.LogException(GetType(), ex);
+                Debug.WriteException(ex);
                 return 0;
             }
         }
         
         public ushort SendGet(string url, string headers)
         {
-            return MakeRequest(() => _httpsClient.Get(url, ParseHeaders(headers)));
+            return MakeRequest(() => _httpsClientPool.Get(url, ParseHeaders(headers)));
         }
         
         public ushort SendPost(string url, string headers, string content)
         {
-            return MakeRequest(() => _httpsClient.Post(url, ParseHeaders(headers), content.NullIfEmpty()));
+            return MakeRequest(() => _httpsClientPool.Post(url, ParseHeaders(headers), content.NullIfEmpty()));
         }
         
         public ushort SendPut(string url, string headers, string content)
         {
-            return MakeRequest(() => _httpsClient.Put(url, ParseHeaders(headers), content.NullIfEmpty()));
+            return MakeRequest(() => _httpsClientPool.Put(url, ParseHeaders(headers), content.NullIfEmpty()));
         }
         
         public ushort SendDelete(string url, string headers, string content)
         {
-            return MakeRequest(() => _httpsClient.Delete(url, ParseHeaders(headers), content.NullIfEmpty()));
+            return MakeRequest(() => _httpsClientPool.Delete(url, ParseHeaders(headers), content.NullIfEmpty()));
         }
 
         public override string ToString()
