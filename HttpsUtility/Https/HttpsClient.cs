@@ -41,7 +41,10 @@ namespace HttpsUtility.Https
         private readonly SyncSection _requestLock = new SyncSection();
         private readonly Lazy<Crestron.SimplSharp.Net.Https.HttpsClient> _httpsClient
             = new Lazy<Crestron.SimplSharp.Net.Https.HttpsClient>(
-                    () => new Crestron.SimplSharp.Net.Https.HttpsClient { PeerVerification = false, HostVerification = false }
+                    () => new Crestron.SimplSharp.Net.Https.HttpsClient {
+                        PeerVerification = false, HostVerification = false,
+                        TimeoutEnabled = true, Timeout = 5
+                    }
                 );
 
         public bool PeerVerification

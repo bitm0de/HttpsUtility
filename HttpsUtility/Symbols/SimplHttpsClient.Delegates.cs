@@ -25,5 +25,5 @@ using Crestron.SimplSharp;
 
 namespace HttpsUtility.Symbols
 {
-    public delegate void SimplHttpsClientResponseDelegate(ushort status, SimplSharpString responseUrl, SimplSharpString content, ushort contentLength);
+    public delegate void SimplHttpsClientResponseDelegate(ushort status, SimplSharpString responseUrl, SimplSharpString content, int contentLength);
 }

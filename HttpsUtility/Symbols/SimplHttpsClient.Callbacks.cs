@@ -32,7 +32,7 @@ namespace HttpsUtility.Symbols
         private void OnSimplHttpsClientResponse(int status, string responseUrl, string content, int length)
         {
             var handler = SimplHttpsClientResponse;
-            if (handler != null) handler.Invoke((ushort)status, responseUrl.EmptyIfNull(), content.EmptyIfNull(), (ushort)length);
+            if (handler != null) handler.Invoke((ushort)status, responseUrl.EmptyIfNull(), content.EmptyIfNull(), length);
         }
     }
 }

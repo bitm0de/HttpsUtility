@@ -37,7 +37,7 @@ namespace HttpsUtility.Symbols
     public sealed partial class SimplHttpsClient
     {
         private readonly string _moduleIdentifier;
-        private readonly HttpsClient _httpsClient = new HttpsClient { PeerVerification = false, HostVerification = false };
+        private readonly HttpsClient _httpsClient = new HttpsClient();
         private readonly SyncSection _httpsOperationLock = new SyncSection();
         
         public SimplHttpsClient()
