@@ -21,19 +21,9 @@
  *
 */
 
-using System;
 using Crestron.SimplSharp;
 
 namespace HttpsUtility.Symbols
 {
-    /* --------------------------------------------  GENERIC SIMPL+ TYPE HELPER ALIASES  -------------------------------------------- */
-    using STRING = String;             // string = STRING
-    using SSTRING = SimplSharpString;  // SimplSharpString = STRING (used to interface with SIMPL+)
-    using INTEGER = UInt16;            // ushort = INTEGER (unsigned)
-    using SIGNED_INTEGER = Int16;      // short = SIGNED_INTEGER
-    using SIGNED_LONG_INTEGER = Int32; // int = SIGNED_LONG_INTEGER
-    using LONG_INTEGER = UInt32;       // uint = LONG_INTEGER (unsigned)
-    /* ------------------------------------------------------------------------------------------------------------------------------ */
-
-    public delegate void SimplHttpsClientResponseDelegate(INTEGER status, SSTRING responseUrl, SSTRING content, INTEGER length);
+    public delegate void SimplHttpsClientResponseDelegate(ushort status, SimplSharpString responseUrl, SimplSharpString content, ushort contentLength);
 }

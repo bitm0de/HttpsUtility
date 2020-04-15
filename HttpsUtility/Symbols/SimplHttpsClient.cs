@@ -26,6 +26,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Crestron.SimplSharp;
 using Crestron.SimplSharp.Reflection;
+using HttpsUtility.Diagnostics;
 using HttpsUtility.Https;
 using HttpsUtility.Threading;
 
@@ -33,34 +34,34 @@ using HttpsUtility.Threading;
 
 namespace HttpsUtility.Symbols
 {
-    /* --------------------------------------------  GENERIC SIMPL+ TYPE HELPER ALIASES  -------------------------------------------- */
-    using STRING = String;             // string = STRING
-    using SSTRING = SimplSharpString;  // SimplSharpString = STRING (used to interface with SIMPL+)
-    using INTEGER = UInt16;            // ushort = INTEGER (unsigned)
-    using SIGNED_INTEGER = Int16;      // short = SIGNED_INTEGER
-    using SIGNED_LONG_INTEGER = Int32; // int = SIGNED_LONG_INTEGER
-    using LONG_INTEGER = UInt32;       // uint = LONG_INTEGER (unsigned)
-    /* ------------------------------------------------------------------------------------------------------------------------------ */
-
     public sealed partial class SimplHttpsClient
     {
-        private readonly Lazy<string> _moduleIdentifier;
-        private readonly HttpsClient _httpsClient = new HttpsClient();
+        private readonly string _moduleIdentifier;
+        private readonly HttpsClient _httpsClient = new HttpsClient { PeerVerification = false, HostVerification = false };
         private readonly SyncSection _httpsOperationLock = new SyncSection();
         
         public SimplHttpsClient()
         {
-            _moduleIdentifier = new Lazy<string>(() =>
-            {
-                var asm = Assembly.GetExecutingAssembly().GetName();
-                return string.Format("{0} {1}", asm.Name, asm.Version.ToString(2));
-            });
+            var asm = Assembly.GetExecutingAssembly().GetName();
+            _moduleIdentifier = string.Format("{0} {1}", asm.Name, asm.Version.ToString(2));
+        }
+
+        public ushort PeerVerification
+        {
+            get { return (ushort)(_httpsClient.PeerVerification ? 1 : 0); }
+            set { _httpsClient.PeerVerification = value != 0; }
+        }
+
+        public ushort HostVerification
+        {
+            get { return (ushort)(_httpsClient.HostVerification ? 1 : 0); }
+            set { _httpsClient.HostVerification = value != 0; }
         }
         
-        private static IEnumerable<KeyValuePair<string, string>> ParseHeaders(STRING input)
+        private static IEnumerable<KeyValuePair<string, string>> ParseHeaders(string input)
         {
             if (string.IsNullOrEmpty(input))
-                return null;
+                return new KeyValuePair<string, string>[] { };
             
             var headerTokens = input.Split('|');
             return (from header in headerTokens
@@ -72,43 +73,66 @@ namespace HttpsUtility.Symbols
                 ).ToList();
         }
 
-        private INTEGER MakeRequest(Func<HttpsResult> action)
+        private ushort MakeRequest(Func<HttpsResult> action)
         {
-            using (_httpsOperationLock.AquireLock())
+            try
             {
-                var response = action.Invoke();
-                foreach (var contentChunk in response.Content.SplitIntoChunks(250))
+                using (_httpsOperationLock.AquireLock())
                 {
-                    OnSimplHttpsClientResponse(response.Status, response.ResponseUrl, contentChunk, response.Content.Length);
-                    CrestronEnvironment.Sleep(10); // allow for things to process
+                    var response = action.Invoke();
+                    if (response == null)
+                    {
+                        Debug.ErrorLog(ErrorLogMessageType.Error, string.Format("{0}: MakeRequest - response is null", GetType().Name));
+                        return 0;
+                    }
+
+                    // Some HTTP(S) responses will not have a message body.
+                    if (response.Content == null)
+                    {
+                        OnSimplHttpsClientResponse(response.Status, response.ResponseUrl, string.Empty, 0);
+                    }
+                    else
+                    {
+                        foreach (var contentChunk in response.Content.SplitIntoChunks(255))
+                        {
+                            OnSimplHttpsClientResponse(response.Status, response.ResponseUrl, contentChunk, response.Content.Length);
+                            CrestronEnvironment.Sleep(10); // allow a little bit for things to process
+                        }
+                    }
+                    
+                    return (ushort)response.Status;
                 }
-                return (INTEGER)response.Status;
+            }
+            catch (Exception ex)
+            {
+                Debug.LogException(GetType(), ex);
+                return 0;
             }
         }
         
-        public INTEGER SendGet(STRING url, STRING headers)
+        public ushort SendGet(string url, string headers)
         {
             return MakeRequest(() => _httpsClient.Get(url, ParseHeaders(headers)));
         }
         
-        public INTEGER SendPost(STRING url, STRING headers, STRING content)
+        public ushort SendPost(string url, string headers, string content)
         {
             return MakeRequest(() => _httpsClient.Post(url, ParseHeaders(headers), content.NullIfEmpty()));
         }
         
-        public INTEGER SendPut(STRING url, STRING headers, STRING content)
+        public ushort SendPut(string url, string headers, string content)
         {
             return MakeRequest(() => _httpsClient.Put(url, ParseHeaders(headers), content.NullIfEmpty()));
         }
         
-        public INTEGER SendDelete(STRING url, STRING headers, STRING content)
+        public ushort SendDelete(string url, string headers, string content)
         {
             return MakeRequest(() => _httpsClient.Delete(url, ParseHeaders(headers), content.NullIfEmpty()));
         }
 
         public override string ToString()
         {
-            return _moduleIdentifier.Value;
+            return _moduleIdentifier;
         }
     }
 }

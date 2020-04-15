@@ -29,6 +29,7 @@ using Crestron.SimplSharp.Net.Https;
 using HttpsUtility.Diagnostics;
 using HttpsUtility.Threading;
 
+using ContentSource = Crestron.SimplSharp.Net.Https.ContentSource;
 using RequestType = Crestron.SimplSharp.Net.Https.RequestType;
 
 // ReSharper disable UnusedMember.Global
@@ -40,8 +41,20 @@ namespace HttpsUtility.Https
         private readonly SyncSection _requestLock = new SyncSection();
         private readonly Lazy<Crestron.SimplSharp.Net.Https.HttpsClient> _httpsClient
             = new Lazy<Crestron.SimplSharp.Net.Https.HttpsClient>(
-                    () => new Crestron.SimplSharp.Net.Https.HttpsClient { PeerVerification = false }
+                    () => new Crestron.SimplSharp.Net.Https.HttpsClient { PeerVerification = false, HostVerification = false }
                 );
+
+        public bool PeerVerification
+        {
+            get { return _httpsClient.Value.PeerVerification; }
+            set { _httpsClient.Value.PeerVerification = value; }
+        }
+
+        public bool HostVerification
+        {
+            get { return _httpsClient.Value.HostVerification; }
+            set { _httpsClient.Value.HostVerification = value; }
+        }
 
         private static HttpsClientRequest CreateDefaultClientRequest(string url, RequestType requestType)
         {
@@ -51,23 +64,27 @@ namespace HttpsUtility.Https
                 RequestType = requestType,
                 Url = new UrlParser(url)
             };
+            
             return httpRequest;
         }
 
-        private HttpsResult SendRequest(string url, RequestType requestType, IEnumerable<KeyValuePair<string, string>> additionalHeaders, string value)
+        private HttpsResult SendRequest(string url, RequestType requestType, IEnumerable<KeyValuePair<string, string>> additionalHeaders, string content)
         {
             using (_requestLock.AquireLock())
             {
                 HttpsClientRequest httpRequest = CreateDefaultClientRequest(url, requestType);
-                
+
                 if (additionalHeaders != null)
                 {
                     foreach (var item in additionalHeaders)
                         httpRequest.Header.AddHeader(new HttpsHeader(item.Key, item.Value));
                 }
 
-                if (!string.IsNullOrEmpty(value))
-                    httpRequest.ContentString = value;
+                if (requestType == RequestType.Post && !string.IsNullOrEmpty(content))
+                {
+                    httpRequest.ContentSource = ContentSource.ContentString;
+                    httpRequest.ContentString = content;
+                }
 
                 try
                 {

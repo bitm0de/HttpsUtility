@@ -21,22 +21,10 @@
  *
 */
 
-using System;
-using Crestron.SimplSharp;
-
 // ReSharper disable UnusedMember.Global
 
 namespace HttpsUtility.Symbols
 {
-    /* --------------------------------------------  GENERIC SIMPL+ TYPE HELPER ALIASES  -------------------------------------------- */
-    using STRING = String;             // string = STRING
-    using SSTRING = SimplSharpString;  // SimplSharpString = STRING (used to interface with SIMPL+)
-    using INTEGER = UInt16;            // ushort = INTEGER (unsigned)
-    using SIGNED_INTEGER = Int16;      // short = SIGNED_INTEGER
-    using SIGNED_LONG_INTEGER = Int32; // int = SIGNED_LONG_INTEGER
-    using LONG_INTEGER = UInt32;       // uint = LONG_INTEGER (unsigned)
-    /* ------------------------------------------------------------------------------------------------------------------------------ */
-
     public sealed partial class SimplHttpsClient
     {
         public SimplHttpsClientResponseDelegate SimplHttpsClientResponse { get; set; }
@@ -44,7 +32,7 @@ namespace HttpsUtility.Symbols
         private void OnSimplHttpsClientResponse(int status, string responseUrl, string content, int length)
         {
             var handler = SimplHttpsClientResponse;
-            if (handler != null) handler.Invoke((INTEGER)status, responseUrl.EmptyIfNull(), content.EmptyIfNull(), (INTEGER)length);
+            if (handler != null) handler.Invoke((ushort)status, responseUrl.EmptyIfNull(), content.EmptyIfNull(), (ushort)length);
         }
     }
 }
