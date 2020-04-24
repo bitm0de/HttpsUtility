@@ -56,12 +56,12 @@ namespace HttpsUtility.Https
                     client.Abort();
 
                 var httpsRequest = new HttpsClientRequest {
-                    RequestType = RequestType.Get,
+                    RequestType = requestType,
                     Encoding = Encoding.UTF8,
                     KeepAlive = false,
                 };
 
-                if (requestType == RequestType.Post && !string.IsNullOrEmpty(content))
+                if (requestType != RequestType.Get && !string.IsNullOrEmpty(content))
                 {
                     httpsRequest.ContentSource = ContentSource.ContentString;
                     httpsRequest.ContentString = content;
