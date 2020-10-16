@@ -35,3 +35,5 @@ namespace HttpsUtility.Symbols
 ## Downloads
 
 * Note: I have no direct affiliation with "SharptoothCode" anymore due to employment changes. I do still have full control over maintaining this repository however. (Current releases on Github will contain the relevant SIMPL Windows and SIMPL+ module files.)
+
+Latest release is available on the releases section: https://github.com/bitm0de/HttpsUtility/releases
