@@ -57,7 +57,6 @@ namespace HttpsUtility.Https
 
                 var httpsRequest = new HttpsClientRequest {
                     RequestType = requestType,
-                    Encoding = Encoding.UTF8,
                     KeepAlive = false,
                 };
 
