@@ -54,8 +54,7 @@ namespace HttpsUtility
             MaxCapacity = maxCapacity;
             _objectPool = new CrestronQueue<T>(initialCapacity);
 
-            if (initialCapacity > 0)
-                AddToPool(initialCapacity, initFunc);
+            AddToPool(initialCapacity, initFunc);
         }
 
         /// <summary>

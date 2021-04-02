@@ -40,7 +40,7 @@ namespace HttpsUtility.Https
             = new ObjectPool<Lazy<HttpsClient>>(HttpsClientPoolSize, HttpsClientPoolSize, 
                 () => new Lazy<HttpsClient>(() => new HttpsClient {
                     PeerVerification = false, HostVerification = false,
-                    TimeoutEnabled = true, Timeout = 5, KeepAlive = false
+                    TimeoutEnabled = true, Timeout = 5, KeepAlive = false,
                 })) { CleanupPoolOnDispose = true };
 
         private HttpsResult SendRequest(string url, RequestType requestType, IEnumerable<KeyValuePair<string, string>> additionalHeaders, string content)
@@ -76,7 +76,7 @@ namespace HttpsUtility.Https
                 httpsRequest.Url.Parse(url);
 
                 HttpsClientResponse httpResponse = client.Dispatch(httpsRequest);
-                return new HttpsResult(httpResponse.Code, httpResponse.ResponseUrl, httpResponse.ContentString);
+                return new HttpsResult(httpResponse.Code, httpResponse.ResponseUrl, httpResponse.ContentBytes);
             }
             catch (Exception ex)
             {

@@ -78,6 +78,7 @@
     <Compile Include="Symbols\SimplHttpsClient.Callbacks.cs" />
     <Compile Include="Symbols\SimplHttpsClient.cs" />
     <Compile Include="Symbols\SimplHttpsClient.Delegates.cs" />
+    <Compile Include="Symbols\StringResponseEncoding.cs" />
     <None Include="Properties\ControlSystem.cfg" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CompactFramework.CSharp.targets" />

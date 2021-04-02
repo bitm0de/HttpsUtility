@@ -32,18 +32,18 @@ namespace HttpsUtility.Diagnostics
     internal static class Debug
     {
         private static bool _enable;
-        private static readonly CTimer _timer = new CTimer(WriteQueueToDisk, null, Timeout.Infinite, Timeout.Infinite);
-        private static readonly CCriticalSection _writeLock = new CCriticalSection();
-        private static readonly CrestronQueue<string> _queue = new CrestronQueue<string>(1024);
+        private static readonly CTimer QueueProcessTimer = new CTimer(WriteQueueToDisk, null, Timeout.Infinite, Timeout.Infinite);
+        private static readonly CCriticalSection WriteLock = new CCriticalSection();
+        private static readonly CrestronQueue<string> MessageQueue = new CrestronQueue<string>(4096);
 
-        private static readonly AssemblyName _asmName;
+        private static readonly AssemblyName AsmName;
 
         /// <summary>Initializes the debug class</summary>
         static Debug()
         {
             try
             {
-                _asmName = Assembly.GetExecutingAssembly().GetName();
+                AsmName = Assembly.GetExecutingAssembly().GetName();
             }
             catch (Exception ex)
             {
@@ -62,9 +62,9 @@ namespace HttpsUtility.Diagnostics
             {
                 _enable = value;
                 if (_enable)
-                    _timer.Reset(0, 5000);
+                    QueueProcessTimer.Reset(0, 5000);
                 else
-                    _timer.Stop();
+                    QueueProcessTimer.Stop();
             }
         }
 
@@ -74,26 +74,26 @@ namespace HttpsUtility.Diagnostics
             {
                 try
                 {
-                    if (!_writeLock.TryEnter())
+                    if (!WriteLock.TryEnter())
                         return;
 
-                    if (!_queue.IsEmpty)
+                    if (!MessageQueue.IsEmpty)
                     {
                         var sb = new StringBuilder(8192);
-                        while (!_queue.IsEmpty)
+                        while (!MessageQueue.IsEmpty)
                         {
                             string logItem;
-                            if (_queue.Dequeue(out logItem))
+                            if (MessageQueue.Dequeue(out logItem))
                                 sb.Append(logItem);
                         }
 
-                        using (var sw = new StreamWriter(string.Format("\\User\\Logs\\{0} {1:yyyy-MM-dd}.log", _asmName.Name, DateTime.Now), true))
+                        using (var sw = new StreamWriter(string.Format("\\User\\Logs\\{0} {1:yyyy-MM-dd}.log", AsmName.Name, DateTime.Now), true))
                             sw.Write(sb.ToString());
                     }
                 }
                 finally
                 {
-                    _writeLock.Leave();
+                    WriteLock.Leave();
                 }
             }
         }
@@ -105,7 +105,7 @@ namespace HttpsUtility.Diagnostics
         /// <param name="args">Format arguments for the message</param>
         private static string InternalFormat(string message, params object[] args)
         {
-            return string.Format("[{0:yyyy-MM-dd HH:mm:ss}] {1}: App{2:00} - {3}", DateTime.Now, string.Format("{0} {1}", _asmName.Name, _asmName.Version),
+            return string.Format("[{0:yyyy-MM-dd HH:mm:ss}] {1}: App{2:00} - {3}", DateTime.Now, string.Format("{0} {1}", AsmName.Name, AsmName.Version),
                 InitialParametersClass.ApplicationNumber, string.Format(message, args));
         }
 
@@ -120,12 +120,12 @@ namespace HttpsUtility.Diagnostics
             {
                 try
                 {
-                    _writeLock.Enter();
-                    CrestronInvoke.BeginInvoke(_ => _queue.Enqueue(InternalFormat(message, args)));
+                    WriteLock.Enter();
+                    CrestronInvoke.BeginInvoke(_ => MessageQueue.Enqueue(InternalFormat(message, args)));
                 }
                 finally
                 {
-                    _writeLock.Leave();
+                    WriteLock.Leave();
                 }
             }
         }

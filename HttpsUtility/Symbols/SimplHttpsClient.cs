@@ -24,6 +24,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using Crestron.SimplSharp;
 using Crestron.SimplSharp.Reflection;
 using HttpsUtility.Diagnostics;
@@ -36,11 +37,26 @@ namespace HttpsUtility.Symbols
     {
         private readonly string _moduleIdentifier;
         private readonly HttpsClientPool _httpsClientPool = new HttpsClientPool();
-        
+
+        public StringResponseEncoding ResponseEncoding { get; set; }
+
         public SimplHttpsClient()
         {
             var asm = Assembly.GetExecutingAssembly().GetName();
             _moduleIdentifier = string.Format("{0} {1}", asm.Name, asm.Version.ToString(2));
+        }
+
+        private static Encoding GetEncoding(StringResponseEncoding responseEncoding)
+        {
+            switch (responseEncoding)
+            {
+                case StringResponseEncoding.ASCII:
+                    return Encoding.ASCII;
+                case StringResponseEncoding.UTF16LE:
+                    return Encoding.Unicode;
+                default:
+                    throw new ArgumentOutOfRangeException("responseEncoding");
+            }
         }
 
         private static IEnumerable<KeyValuePair<string, string>> ParseHeaders(string input)
@@ -76,9 +92,10 @@ namespace HttpsUtility.Symbols
                 }
                 else
                 {
-                    foreach (var contentChunk in response.Content.SplitIntoChunks(255))
+                    var messageBody = response.GetContent(GetEncoding(ResponseEncoding));
+                    foreach (var contentChunk in messageBody.SplitIntoChunks(256))
                     {
-                        OnSimplHttpsClientResponse(response.Status, response.ResponseUrl, contentChunk, response.Content.Length);
+                        OnSimplHttpsClientResponse(response.Status, response.ResponseUrl, contentChunk, messageBody.Length);
                         CrestronEnvironment.Sleep(10); // allow a little bit for things to process
                     }
                 }

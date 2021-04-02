@@ -21,24 +21,45 @@
  *
 */
 
+using System.Collections.ObjectModel;
+using System.Text;
+
 namespace HttpsUtility.Https
 {
     public class HttpsResult
     {
         private readonly int _status;
-        public int Status { get { return _status; } }
-
         private readonly string _responseUrl;
-        public string ResponseUrl { get { return _responseUrl; } }
+        private readonly ReadOnlyCollection<byte> _content;
 
-        private readonly string _content;
-        public string Content { get { return _content; } }
-        
-        public HttpsResult(int status, string responseUrl, string content)
+        private readonly byte[] _contentBytes;
+
+        public int Status
+        {
+            get { return _status; }
+        }
+
+        public string ResponseUrl
+        {
+            get { return _responseUrl; }
+        }
+
+        public ReadOnlyCollection<byte> Content
+        {
+            get { return _content; }
+        }
+
+        public string GetContent(Encoding encoding)
+        {
+            return encoding.GetString(_contentBytes, 0, _contentBytes.Length);
+        }
+
+        public HttpsResult(int status, string responseUrl, byte[] content)
         {
             _status = status;
             _responseUrl = responseUrl;
-            _content = content;
+            _content = new ReadOnlyCollection<byte>(content);
+            _contentBytes = content;
         }
     }
 }
