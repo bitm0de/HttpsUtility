@@ -23,7 +23,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Text;
 using Crestron.SimplSharp.Net.Https;
 using HttpsUtility.Diagnostics;
 
