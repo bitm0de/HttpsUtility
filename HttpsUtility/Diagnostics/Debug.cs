@@ -29,7 +29,7 @@ using Crestron.SimplSharp.Reflection;
 
 namespace HttpsUtility.Diagnostics
 {
-    internal static class Debug
+    public static class Debug
     {
         private static bool _enable;
         private static readonly CTimer _timer = new CTimer(WriteQueueToDisk, null, Timeout.Infinite, Timeout.Infinite);
