@@ -61,10 +61,10 @@ namespace HttpsUtility.Https
                     KeepAlive = false,
                 };
 
-                if (requestType != RequestType.Get && !string.IsNullOrEmpty(content))
+                if (requestType != RequestType.Get)
                 {
                     httpsRequest.ContentSource = ContentSource.ContentString;
-                    httpsRequest.ContentString = content;
+                    httpsRequest.ContentString = content ?? string.Empty;
                 }
                 
                 if (additionalHeaders != null)
