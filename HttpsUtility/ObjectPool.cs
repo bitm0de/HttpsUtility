@@ -35,9 +35,10 @@ namespace HttpsUtility
 
         /// <summary>
         /// Initializes a new object pool with a specified initial and max capacity.
+        /// A max capacity of -1 indicates there is no limit.
         /// </summary>
         /// <param name="initialCapacity">Initial pool capacity.</param>
-        /// <param name="maxCapacity">Max pool capacity</param>
+        /// <param name="maxCapacity">Max pool capacity. A value of -1 means the pool has no maximum.</param>
         /// <param name="initFunc">Initialization function</param>
         /// <exception cref="ArgumentException">Invalid initial or max capacity.</exception>
         public ObjectPool(int initialCapacity, int maxCapacity, Func<T> initFunc)
@@ -45,10 +46,10 @@ namespace HttpsUtility
             if (initialCapacity < 1)
                 throw new ArgumentException("Initial capacity cannot be less than 1.");
 
-            if (maxCapacity < 1)
-                throw new ArgumentException("Max capacity cannot be less than 1.");
+            if (maxCapacity < -1 || maxCapacity == 0)
+                throw new ArgumentException("Max capacity cannot be less than 1, except -1 which indicates no limit.");
 
-            if (initialCapacity > maxCapacity)
+            if (maxCapacity != -1 && initialCapacity > maxCapacity)
                 throw new ArgumentException("Initial capacity cannot be greater than max capacity.");
 
             MaxCapacity = maxCapacity;
@@ -61,7 +62,7 @@ namespace HttpsUtility
         /// <summary>
         /// Max capacity of the object pool.
         /// </summary>
-        /// <remarks>A max capacity of -1 indicates there is no max capacity.</remarks>
+        /// <remarks>A max capacity of -1 indicates there is no maximum capacity.</remarks>
         public int MaxCapacity { get; private set; }
 
         /// <summary>
@@ -79,9 +80,11 @@ namespace HttpsUtility
         /// Adds (or returns) an object to the pool.
         /// </summary>
         /// <param name="obj"></param>
+        /// <remarks>If <see cref="MaxCapacity"/> is -1, the object is enqueued immediately.</remarks>
         public void AddToPool(T obj)
         {
-            if (Interlocked.Increment(ref _currentCount) > MaxCapacity)
+            var newCount = Interlocked.Increment(ref _currentCount);
+            if (MaxCapacity != -1 && newCount > MaxCapacity)
                 _queueReturnEvent.Wait();
 
             if (_disposed) return;
