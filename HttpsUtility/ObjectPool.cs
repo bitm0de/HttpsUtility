@@ -10,7 +10,6 @@ namespace HttpsUtility
     public sealed class ObjectPool<T> : IDisposable
         where T : class, new()
     {
-        private readonly  CCriticalSection _disposeLock = new CCriticalSection();
         private readonly CrestronQueue<T> _objectPool;
 
         private readonly CEvent _queueAddEvent = new CEvent(false, true);
@@ -54,9 +53,7 @@ namespace HttpsUtility
 
             MaxCapacity = maxCapacity;
             _objectPool = new CrestronQueue<T>(initialCapacity);
-
-            if (initialCapacity > 0)
-                AddToPool(initialCapacity, initFunc);
+            AddToPool(initialCapacity, initFunc);
         }
 
         /// <summary>
@@ -154,7 +151,6 @@ namespace HttpsUtility
                 _objectPool.Dispose();
                 _queueAddEvent.Dispose();
                 _queueReturnEvent.Dispose();
-                _disposeLock.Dispose();
             }
         }
     }
