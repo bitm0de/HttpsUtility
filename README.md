@@ -31,6 +31,7 @@ namespace HttpsUtility.Symbols
     INTEGER_FUNCTION SendPost(STRING url, STRING headers, STRING content);
     INTEGER_FUNCTION SendPut(STRING url, STRING headers, STRING content);
     INTEGER_FUNCTION SendDelete(STRING url, STRING headers, STRING content);
+    INTEGER_FUNCTION SendPatch(STRING url, STRING headers, STRING content);
     STRING_FUNCTION ToString();
     SIGNED_LONG_INTEGER_FUNCTION GetHashCode();
   }
@@ -41,4 +42,4 @@ namespace HttpsUtility.Symbols
 
 * Note: I have no direct affiliation with "SharptoothCode" anymore due to employment changes. I do still have full control over maintaining this repository however. (Current releases on Github will contain the relevant SIMPL Windows and SIMPL+ module files.)
 
-Latest release is available on the releases section: https://github.com/bitm0de/HttpsUtility/releases
+The latest release is available i~~~~n the releases section: https://github.com/bitm0de/HttpsUtility/releases
