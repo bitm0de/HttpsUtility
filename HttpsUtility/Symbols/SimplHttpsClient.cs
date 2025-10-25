@@ -24,7 +24,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Crestron.SimplSharp;
+using System.Text.RegularExpressions;
 using Crestron.SimplSharp.Reflection;
 using HttpsUtility.Diagnostics;
 using HttpsUtility.Https;
@@ -48,7 +48,10 @@ namespace HttpsUtility.Symbols
             if (string.IsNullOrEmpty(input))
                 return new KeyValuePair<string, string>[] { };
             
-            var headerTokens = input.Split('|');
+            // Support escaped pipes: \| should be treated as literal
+            var headerTokens = Regex.Split(input, @"(?<!\\)\|")
+                .Select(h => h.Replace(@"\|", "|"));
+
             return (from header in headerTokens
                 let n = header.IndexOf(':')
                 where n != -1
@@ -76,10 +79,11 @@ namespace HttpsUtility.Symbols
                 }
                 else
                 {
+                    // Split the content into chunks of 255 bytes.
+                    // TODO: look at Crestron buffer sizes.
                     foreach (var contentChunk in response.Content.SplitIntoChunks(255))
                     {
                         OnSimplHttpsClientResponse(response.Status, response.ResponseUrl, contentChunk, response.Content.Length);
-                        CrestronEnvironment.Sleep(10); // allow a little bit for things to process
                     }
                 }
 
