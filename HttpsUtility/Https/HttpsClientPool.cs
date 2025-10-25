@@ -37,10 +37,12 @@ namespace HttpsUtility.Https
         private const int HttpsClientPoolSize = 10;
 
         private readonly ObjectPool<Lazy<HttpsClient>> _httpsClientPool
-            = new ObjectPool<Lazy<HttpsClient>>(HttpsClientPoolSize, HttpsClientPoolSize, 
+            = new ObjectPool<Lazy<HttpsClient>>(HttpsClientPoolSize, HttpsClientPoolSize,
                 () => new Lazy<HttpsClient>(() => new HttpsClient {
-                    PeerVerification = false, HostVerification = false,
-                    TimeoutEnabled = true, Timeout = 5, KeepAlive = false
+                    PeerVerification = false,
+                    HostVerification = false,
+                    TimeoutEnabled = true,
+                    Timeout = 5, // TODO: make configurable
                 })) { CleanupPoolOnDispose = true };
 
         private HttpsResult SendRequest(string url, RequestType requestType, IEnumerable<KeyValuePair<string, string>> additionalHeaders, string content)
@@ -51,14 +53,14 @@ namespace HttpsUtility.Https
             try
             {
                 Debug.WriteInfo("Making API GET request to endpoint: {0}", url);
-                
+
                 if (client.ProcessBusy)
                     client.Abort();
 
                 var httpsRequest = new HttpsClientRequest {
                     RequestType = requestType,
                     Encoding = Encoding.UTF8,
-                    KeepAlive = false,
+                    KeepAlive = false, // TODO: make configurable
                 };
 
                 if (requestType != RequestType.Get)
@@ -66,7 +68,7 @@ namespace HttpsUtility.Https
                     httpsRequest.ContentSource = ContentSource.ContentString;
                     httpsRequest.ContentString = content ?? string.Empty;
                 }
-                
+
                 if (additionalHeaders != null)
                 {
                     foreach (var item in additionalHeaders)
@@ -133,6 +135,16 @@ namespace HttpsUtility.Https
         public HttpsResult Delete(string url, IEnumerable<KeyValuePair<string, string>> additionalHeaders, string value)
         {
             return SendRequest(url, RequestType.Delete, additionalHeaders, value);
+        }
+
+        public HttpsResult Patch(string url, string value)
+        {
+            return Patch(url, null, value);
+        }
+
+        public HttpsResult Patch(string url, IEnumerable<KeyValuePair<string, string>> additionalHeaders, string value)
+        {
+            return SendRequest(url, RequestType.Patch, additionalHeaders, value);
         }
 
         public void Dispose()
